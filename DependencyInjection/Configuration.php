@@ -83,6 +83,8 @@ class Configuration implements ConfigurationInterface
                             ->defaultValue('auto')
                         ->end()
                         ->scalarNode('formatter')->defaultNull()->end()
+                        ->booleanNode('profile_discovered_client')->defaultTrue()->end()
+                        ->booleanNode('profile_discovered_async_client')->defaultFalse()->end()
                         ->scalarNode('captured_body_length')
                             ->defaultValue(0)
                             ->canNotBeEmpty()
