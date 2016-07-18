@@ -301,23 +301,27 @@ class HttplugExtension extends Extension
                 if ($httpClient !== null) {
                     throw new \LogicException('Only one client can configured with "use_with_discovery: http_client".');
                 }
-                $httpClient = new Reference('http.client.'.$name);
+                $httpClient = new Reference('httplug.client.'.$name);
             } elseif ($arguments['use_with_discovery'] === 'async_client') {
                 if ($asyncHttpClient !== null) {
                     throw new \LogicException('Only one client can be configured with "use_with_discovery: async_client".');
                 }
-                $asyncHttpClient = new Reference('http.client.'.$name);
+                $asyncHttpClient = new Reference('httplug.client.'.$name);
             }
         }
 
         if ($httpClient === null) {
             // Use auto discovery
-            $asyncHttpClient = $this->registerAutoDiscoverableClientWithDebugPlugin($container, 'client');
+            if ($config['toolbar']['profile_discovered_client']) {
+                $httpClient = $this->registerAutoDiscoverableClientWithDebugPlugin($container, 'client');
+            }
         }
 
         if ($asyncHttpClient === null) {
             // Use auto discovery
-            $asyncHttpClient = $this->registerAutoDiscoverableClientWithDebugPlugin($container, 'async_client');
+            if ($config['toolbar']['profile_discovered_async_client']) {
+                $asyncHttpClient = $this->registerAutoDiscoverableClientWithDebugPlugin($container, 'async_client');
+            }
         }
 
 
