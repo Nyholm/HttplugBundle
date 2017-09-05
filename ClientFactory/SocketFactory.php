@@ -3,6 +3,7 @@
 namespace Http\HttplugBundle\ClientFactory;
 
 use Http\Client\Socket\Client;
+use Http\HttplugBundle\Collector\ProxyFactory;
 use Http\Message\MessageFactory;
 
 /**
@@ -32,6 +33,11 @@ class SocketFactory implements ClientFactory
             throw new \LogicException('To use the Socket client you need to install the "php-http/socket-client" package.');
         }
 
-        return new Client($this->messageFactory, $config);
+        $class = Client::class;
+        if ($config['_profiling']) {
+            $class = ProxyFactory::createProxy($class);
+        }
+
+        return new $class($this->messageFactory, $config);
     }
 }

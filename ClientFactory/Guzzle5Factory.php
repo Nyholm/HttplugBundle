@@ -4,6 +4,7 @@ namespace Http\HttplugBundle\ClientFactory;
 
 use GuzzleHttp\Client;
 use Http\Adapter\Guzzle5\Client as Adapter;
+use Http\HttplugBundle\Collector\ProxyFactory;
 use Http\Message\MessageFactory;
 
 /**
@@ -35,6 +36,11 @@ class Guzzle5Factory implements ClientFactory
 
         $client = new Client($config);
 
-        return new Adapter($client, $this->messageFactory);
+        $class = Adapter::class;
+        if ($config['_profiling']) {
+            $class = ProxyFactory::createProxy($class);
+        }
+
+        return new $class($client, $this->messageFactory);
     }
 }

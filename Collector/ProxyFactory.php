@@ -12,15 +12,7 @@ class ProxyFactory
     /**
      * @type string
      */
-    private $proxyDirectory;
-
-    /**
-     * @param string $proxyDirectory
-     */
-    public function __construct($proxyDirectory)
-    {
-        $this->proxyDirectory = $proxyDirectory;
-    }
+    public static $proxyDirectory;
 
     /**
      * Create a proxy that handles data collecting better.
@@ -30,11 +22,15 @@ class ProxyFactory
      *
      * @return string the name of a much much better class
      */
-    public function createProxy($class, &$proxyFile = null)
+    public static function createProxy($class, &$proxyFile = null)
     {
-        $proxyClass = $this->getProxyClass($class);
+        if (null === self::$proxyDirectory) {
+            self::$proxyDirectory = sys_get_temp_dir();
+        }
+
+        $proxyClass = self::getProxyClass($class);
         $class = '\\'.rtrim($class, '\\');
-        $proxyFile = $this->proxyDirectory.'/'.$proxyClass.'.php';
+        $proxyFile = self::$proxyDirectory.'/'.$proxyClass.'.php';
 
         if (class_exists($proxyClass)) {
             return $proxyClass;
@@ -44,21 +40,21 @@ class ProxyFactory
         $content = str_replace('__TPL_CLASS__', $proxyClass, $content);
         $content = str_replace('__TPL_EXTENDS__', $class, $content);
 
-        $this->checkProxyDirectory();
+        self::checkProxyDirectory();
         file_put_contents($proxyFile, $content);
         require $proxyFile;
 
         return $proxyClass;
     }
 
-    private function checkProxyDirectory()
+    private static function checkProxyDirectory()
     {
-        if (!is_dir($this->proxyDirectory)) {
-            @mkdir($this->proxyDirectory, 0777, true);
+        if (!is_dir(self::$proxyDirectory)) {
+            @mkdir(self::$proxyDirectory, 0777, true);
         }
     }
 
-    private function getProxyClass($namespace)
+    private static function getProxyClass($namespace)
     {
         return 'httplug_proxy_'.str_replace('\\', '_', $namespace);
     }

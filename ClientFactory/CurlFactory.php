@@ -3,6 +3,7 @@
 namespace Http\HttplugBundle\ClientFactory;
 
 use Http\Client\Curl\Client;
+use Http\HttplugBundle\Collector\ProxyFactory;
 use Http\Message\MessageFactory;
 use Http\Message\StreamFactory;
 
@@ -53,6 +54,11 @@ class CurlFactory implements ClientFactory
             }
         }
 
-        return new Client($this->messageFactory, $this->streamFactory, $config);
+        $class = Client::class;
+        if ($config['_profiling']) {
+            $class = ProxyFactory::createProxy($class);
+        }
+
+        return new $class($this->messageFactory, $this->streamFactory, $config);
     }
 }

@@ -3,6 +3,7 @@
 namespace Http\HttplugBundle\ClientFactory;
 
 use Http\Adapter\React\Client;
+use Http\HttplugBundle\Collector\ProxyFactory;
 use Http\Message\MessageFactory;
 
 /**
@@ -32,6 +33,11 @@ class ReactFactory implements ClientFactory
             throw new \LogicException('To use the React adapter you need to install the "php-http/react-adapter" package.');
         }
 
-        return new Client($this->messageFactory);
+        $class = Client::class;
+        if ($config['_profiling']) {
+            $class = ProxyFactory::createProxy($class);
+        }
+
+        return new $class($this->messageFactory);
     }
 }

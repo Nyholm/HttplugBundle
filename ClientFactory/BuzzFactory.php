@@ -4,6 +4,7 @@ namespace Http\HttplugBundle\ClientFactory;
 
 use Buzz\Client\FileGetContents;
 use Http\Adapter\Buzz\Client as Adapter;
+use Http\HttplugBundle\Collector\ProxyFactory;
 use Http\Message\MessageFactory;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -42,7 +43,12 @@ class BuzzFactory implements ClientFactory
         $client->setVerifyHost($options['verify_host']);
         $client->setProxy($options['proxy']);
 
-        return new Adapter($client, $this->messageFactory);
+        $class = Adapter::class;
+        if ($config['_profiling']) {
+            $class = ProxyFactory::createProxy($class);
+        }
+
+        return new $class($client, $this->messageFactory);
     }
 
     /**

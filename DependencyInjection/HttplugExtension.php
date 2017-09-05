@@ -72,7 +72,7 @@ class HttplugExtension extends Extension
             ;
         }
 
-        $this->configureClients($container, $config);
+        $this->configureClients($container, $config, $profilingEnabled);
         $this->configurePlugins($container, $config['plugins']); // must be after clients, as clients.X.plugins might use plugins as templates that will be removed
         $this->configureAutoDiscoveryClients($container, $config);
     }
@@ -82,8 +82,9 @@ class HttplugExtension extends Extension
      *
      * @param ContainerBuilder $container
      * @param array            $config
+     * @param bool             $profilingEnabled
      */
-    private function configureClients(ContainerBuilder $container, array $config)
+    private function configureClients(ContainerBuilder $container, array $config, $profilingEnabled)
     {
         $first = null;
         $clients = [];
@@ -93,6 +94,8 @@ class HttplugExtension extends Extension
                 // Save the name of the first configured client.
                 $first = $name;
             }
+
+            $arguments['_profiling'] = $profilingEnabled;
 
             $this->configureClient($container, $name, $arguments);
             $clients[] = $name;
@@ -287,6 +290,7 @@ class HttplugExtension extends Extension
             ->register($serviceId.'.client', HttpClient::class)
             ->setFactory([new Reference($arguments['factory']), 'createClient'])
             ->addArgument($arguments['config'])
+            ->addArgument($arguments['_profiling'])
             ->setPublic(false)
         ;
 
